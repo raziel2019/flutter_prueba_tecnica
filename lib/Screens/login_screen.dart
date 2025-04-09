@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prueba_tecnica/Services/auth_service.dart';
 import 'package:prueba_tecnica/Widgets/custom_button.dart';
 import 'package:prueba_tecnica/Widgets/custom_text_field.dart';
 
@@ -42,9 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: (){
               if(_formKey.currentState!.validate()){
                 _formKey.currentState!.save();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Sesion Iniciada"))
-                );
+                login();
               }
             } , 
             customText: "Iniciar Sesion"
@@ -75,5 +74,33 @@ class _LoginScreenState extends State<LoginScreen> {
       
     );
   }
+
+  void login() async {
+    
+    final auth = AuthService();
+    try{
+      final success = await auth.login(
+        email: email, 
+        password: password
+        );
+      if(success){
+        print("Login exitoso");
+        if(mounted){
+          ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(content: Text("Login exitoso"))
+            );
+          Navigator.pushNamed(context, '/home');
+        }else {
+        print("Error en el Login");
+
+        }
+      }
+
+    }catch(error){
+      print("Error al hacer login: $error");
+    }
+
+  }
+
 }
 
