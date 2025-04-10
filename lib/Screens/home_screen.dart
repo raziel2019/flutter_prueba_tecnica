@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String code = '';
   String name = '';
   String description = '';
-  String photo = '';
+  File? photo;
   int parent_id = 0;
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
@@ -60,6 +60,37 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
+  List<DropdownMenuItem<int>> _buildCategoryDropdownItems(List<dynamic> categories) {
+  List<DropdownMenuItem<int>> items = [];
+
+  for (var parent in categories) {
+    items.add(
+      DropdownMenuItem(
+        value: parent['id'],
+        child: Text(parent['name']),
+      ),
+    );
+
+    final children = parent['children'] as List<dynamic>?;
+    if (children != null && children.isNotEmpty) {
+      for (var child in children) {
+        items.add(
+          DropdownMenuItem(
+            value: child['id'],
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Text('↳ ${child['name']}'),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  return items;
+}
+
 
   void _showAddCategoryDialog(){
     showDialog(
@@ -104,13 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       labelText: "Categoria padre",
                       border: OutlineInputBorder(),
                     ),
-                    items: _categories
-                    .map<DropdownMenuItem>((category){
-                      return DropdownMenuItem(
-                        value: category['id'],
-                        child: Text(category['name']),
-                      );
-                    }).toList(), 
+                    items: _buildCategoryDropdownItems(_categories),
                     onChanged: (value) {
                       parent_id = value ?? 0;
                     }
@@ -130,7 +155,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 16,),
                   CustomButton(
                     customText: "Guardar",
-                    onPressed: (){},
+                    onPressed: (){
+                      if(_formKey.currentState!.validate()){
+                      _formKey.currentState!.save();
+                      saveCategory();  
+                      }
+                    },
                     ),
                   SizedBox(height: 16,),
                   CustomButton(
@@ -235,6 +265,25 @@ class _HomeScreenState extends State<HomeScreen> {
         return const Center(child: Text('Información de la app', style: optionStyle));
       default:
         return const Center(child: Text('Página no encontrada', style: optionStyle));
+    }
+  }
+
+  void saveCategory() async{
+    final category = CategoryService();
+    try {
+      final success = await category.createCategory(
+        code: code,
+        name: name,
+        description: description,
+        photo: _imageFile,
+        parent_id: parent_id
+      );
+    if(success){
+      print("Categoria registrada");
+
+    }
+    }catch(error){
+      print("Error al guardar una categoria: $error");
     }
   }
 

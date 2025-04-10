@@ -43,7 +43,6 @@ final Dio _dio = ApiClient().dio;
       final token = response.data['token'];
       if(token != null){
           await _storage.write(key: 'auth_token', value: token);
-          print(token);
           return true;
       }
 

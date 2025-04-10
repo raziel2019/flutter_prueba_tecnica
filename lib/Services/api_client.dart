@@ -12,9 +12,6 @@ class ApiClient {
   ApiClient._internal() {
     dio = Dio(BaseOptions(
       baseUrl: dotenv.env['API_URL']!,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     ));
 
     dio.interceptors.add(InterceptorsWrapper(
